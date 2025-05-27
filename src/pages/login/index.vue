@@ -1,49 +1,49 @@
 <template>
   <Container>
-    <NavBar/>
-    <form class="max-w-md mx-auto mt-16 space-y-6  p-8 rounded-2xl shadow-lg" @submit.prevent="submitForm">
+    <NavBar />
+    <form
+      class="max-w-md mx-auto mt-16 space-y-6 p-8 rounded-2xl shadow-lg"
+      @submit.prevent="submitForm"
+    >
       <h2 class="text-2xl font-bold text-center">Login Your Account</h2>
-      <InputField
-          v-model="form.email"
-          :error="errors.email"
-          label="Email"
-          type="email"
-      />
+      <InputField v-model="form.email" :error="errors.email" label="Email" type="email" />
 
       <InputField
-          v-model="form.password"
-          :error="errors.password"
-          label="Password"
-          type="password"
+        v-model="form.password"
+        :error="errors.password"
+        label="Password"
+        type="password"
       />
 
       <button
-          class="w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition"
-          type="submit"
+        class="w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition"
+        type="submit"
       >
         Login
       </button>
 
       <p v-if="success" class="text-green-500 text-center text-sm mt-4">
-        🎉 Login successful! <br/>Please check your email to confirm
+        🎉 Login successful! <br />Please check your email to confirm
       </p>
     </form>
   </Container>
 </template>
 
 <script lang="ts" setup>
-import {reactive, ref} from 'vue'
+import { reactive, ref } from 'vue'
 import InputField from '@/components/inputField.vue'
-import NavBar from "@/components/NavBar.vue";
-import Container from "@/components/container.vue";
-import {useApi} from "@/stores/useApi.ts";
-import {useRouter} from "vue-router";
+import NavBar from '@/components/NavBar.vue'
+import Container from '@/components/container.vue'
+import { useApi } from '@/stores/useApi.ts'
+import { useRouter } from 'vue-router'
+import type { LoginResponse } from '@/types/response.ts'
+import { useAuth } from '@/stores/useAuth.ts'
 
 const router = useRouter()
 
 const form = reactive({
   email: '',
-  password: ''
+  password: '',
 })
 
 const errors = reactive({
@@ -73,18 +73,16 @@ async function submitForm() {
 
 async function postLogin() {
   const url = '/api/v1/auth/login'
-  const {response, data} = await useApi(url, {
+  const { response, data } = await useApi<LoginResponse>(url, {
     method: 'POST',
     body: JSON.stringify(form),
-  })
+  }).json()
 
-  const body = await response.value?.json()
-  if (body.code === 200) {
-    localStorage.setItem('access_token', body.data.access_token)
-    localStorage.setItem('refresh_token', body.data.refresh_token)
+  if (data.value.code === 200) {
+    const auth = useAuth()
+    auth.set(data.value.data.access_token, data.value.data.refresh_token)
     success.value = true
-    await router.push('/dashboard')
+    await router.push('/home')
   }
 }
-
 </script>

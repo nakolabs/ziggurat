@@ -6,7 +6,10 @@ const About = () => import('@/pages/about/index.vue')
 const Register = () => import('@/pages/register/index.vue')
 const EmailVerification = () => import('@/pages/email-confirmation/index.vue')
 const Login = () => import('@/pages/login/index.vue')
-const Dashboard = () => import('@/pages/dashboard/index.vue')
+const Home = () => import('@/pages/home/index.vue')
+const School = () => import('@/pages/school/index.vue')
+const Student = () => import('@/pages/student/index.vue')
+const Teacher = () => import('@/pages/teacher/index.vue')
 
 const routes = [
     {path: '/', name: 'LandingPage', component: LandingPage},
@@ -14,7 +17,10 @@ const routes = [
     {path: '/register', name: 'Register', component: Register},
     {path: '/email-verification', name: 'EmailVerification', component: EmailVerification},
     {path: '/login', name: 'Login', component: Login},
-    {path: '/dashboard', name: 'Dashboard', component: Dashboard},
+    {path: '/home', name: 'Home', component: Home, meta: {requiresAuth: true}},
+    {path: '/teacher', name: 'Teacher', component: Teacher, meta: {requiresAuth: true}},
+    {path: '/school', name: 'School', component: School, meta: {requiresAuth: true}},
+    {path: '/student', name: 'Student', component: Student, meta: {requiresAuth: true}},
     {
         path: '/:pathMatch(.*)*',
         name: 'NotFound',
