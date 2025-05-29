@@ -11,7 +11,7 @@ export const useApi = createFetch({
   combination: 'overwrite',
   options: {
     beforeFetch({ options }) {
-      const token = localStorage.getItem('access_token')
+      const token = useAuth().get()?.accessToken
       options.headers = {
         ...options.headers,
         Authorization: `Bearer ${token}`,
@@ -36,20 +36,16 @@ export const useApi = createFetch({
               }),
             })
 
-            console.log('refreshResponse', refreshResponse.status)
-
             if (!refreshResponse.ok) {
               window.location.href = '/login'
               return { data, response }
             }
 
             const refreshData: RefreshTokenResponse = await refreshResponse.json()
-            console.log('refreshData', refreshData)
             const newAccessToken = refreshData.data.access_token
             const newRefreshToken = refreshData.data.refresh_token
 
             // Set new tokens
-            localStorage.setItem('access_token', newAccessToken)
             auth.set(newAccessToken, newRefreshToken)
 
             // Notify all waiting requests

@@ -2,7 +2,20 @@
 import Sidenav from '@/components/sidenav.vue'
 import DarkMode from '@/components/darkMode.vue'
 import Container from '@/components/container.vue'
-import { Bell, User, Search, Menu } from 'lucide-vue-next'
+import {
+  Bell,
+  User,
+  Search,
+  Menu,
+  Home,
+  Building,
+  Users,
+  GraduationCap,
+  BookOpen,
+  School,
+  HelpCircle,
+  FileText,
+} from 'lucide-vue-next'
 import { ref } from 'vue'
 import { useAuth } from '@/stores/useAuth.ts'
 import Logo from '@/assets/logo.png'
@@ -14,22 +27,42 @@ const items = [
   {
     name: 'Dashboard',
     path: '/home',
-    icon: 'home',
+    icon: Home,
   },
   {
     name: 'Schools',
     path: '/school',
-    icon: 'building',
+    icon: Building,
   },
   {
     name: 'Teachers',
     path: '/teacher',
-    icon: 'users',
+    icon: Users,
   },
   {
     name: 'Students',
     path: '/student',
-    icon: 'graduation-cap',
+    icon: GraduationCap,
+  },
+  {
+    name: 'Subjects',
+    path: '/subject',
+    icon: BookOpen,
+  },
+  {
+    name: 'Classes',
+    path: '/class',
+    icon: School,
+  },
+  {
+    name: 'Questions',
+    path: '/question',
+    icon: HelpCircle,
+  },
+  {
+    name: 'Exams',
+    path: '/exam',
+    icon: FileText,
   },
 ]
 

@@ -27,28 +27,11 @@
       <div class="rounded-lg border border-neutral-200 dark:border-neutral-800 p-6">
         <div class="flex flex-col sm:flex-row gap-4">
           <div class="flex-1">
-            <div class="relative">
-              <svg
-                class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <input
-                v-model="searchQuery"
-                @input="handleSearch"
-                type="text"
-                placeholder="Search teachers by name or email..."
-                class="w-full pl-10 pr-4 py-2.5 border border-neutral-200 dark:border-neutral-800 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white placeholder-neutral-400"
-              />
-            </div>
+            <SearchInput
+              v-model="searchQuery"
+              placeholder="Search teachers by name or email..."
+              @input="onSearchInput"
+            />
           </div>
           <select
             v-model="verificationFilter"
@@ -62,74 +45,20 @@
         </div>
       </div>
 
-      <!-- Teachers Table -->
-      <div class="rounded-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-neutral-800">
-            <thead class="bg-neutral-50 dark:bg-neutral-900">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                  Teacher
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                  Contact
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                  Status
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-neutral-50 dark:bg-neutral-900/90 divide-y divide-neutral-900">
-              <tr v-if="isFetching">
-                <td colspan="4" class="px-6 py-4 text-center text-neutral-400">Loading...</td>
-              </tr>
-              <tr v-else v-for="teacher in data?.data" :key="teacher.id" class="transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10">
-                      <div
-                        class="h-10 w-10 rounded-full bg-neutral-600 flex items-center justify-center"
-                      >
-                        <span class="text-sm font-medium">
-                          {{ teacher.name.charAt(0).toUpperCase() }}
-                        </span>
-                      </div>
-                    </div>
-                    <div class="ml-4">
-                      <div class="text-sm font-medium">{{ teacher.name }}</div>
-                      <div class="text-sm">{{ teacher.email }}</div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm">{{ teacher.email }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    :class="[
-                      'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
-                      teacher.is_verified
-                        ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                        : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20',
-                    ]"
-                  >
-                    {{ teacher.is_verified ? 'Verified' : 'Pending' }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button class="text-orange-400 hover:text-orange-300 mr-3 transition-colors">
-                    Edit
-                  </button>
-                  <button class="text-red-400 hover:text-red-300 transition-colors">Remove</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <!-- Teachers Table (reusable component) -->
+      <TeachersTable :teachers="data?.data || []" :loading="isFetching" />
+
+      <!-- Invite Teacher Modal (reusable component) -->
+      <InviteTeacherModal
+        v-if="showInviteModal"
+        :loading="inviteLoading"
+        :error="inviteErrorMsg"
+        :success="inviteSuccessMsg"
+        :email="inviteForm.email"
+        @update:email="inviteForm.email = $event"
+        @close="closeInviteModal"
+        @submit="inviteTeacher"
+      />
     </div>
   </Dashboard>
 </template>
@@ -138,6 +67,9 @@
 import { ref, computed, watch } from 'vue'
 import { useApi } from '@/stores/useApi.ts'
 import Dashboard from '@/layout/dashboard.vue'
+import InviteTeacherModal from '@/components/InviteTeacherModal.vue'
+import SearchInput from '@/components/SearchInput.vue'
+import TeachersTable from '@/components/TeachersTable.vue'
 import { useAuth } from '@/stores/useAuth.ts'
 import type { ListTeacherResponse, Teacher } from '@/types/response.ts'
 
@@ -156,7 +88,11 @@ const apiUrl = computed(() => {
     school_id: auth.get()?.payload.user.school_id || '',
     page: currentPage.value.toString(),
     limit: pageSize.value.toString(),
+    search: searchQuery.value,
   })
+
+  params.append('search_by', 'name')
+  params.append('search_by', 'email')
 
   if (searchQuery.value) {
     params.append('search', searchQuery.value)
@@ -172,18 +108,75 @@ const apiUrl = computed(() => {
 // API call
 const { data, isFetching, error, execute: refetch } = useApi<ListTeacherResponse>(apiUrl).json()
 
-// Methods
-const handleSearch = () => {
-  currentPage.value = 1
-  refetch()
+// Debounce logic for search
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
+function onSearchInput() {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    currentPage.value = 1
+    refetch()
+  }, 400)
 }
 
+// Methods
 const handleFilterChange = () => {
   currentPage.value = 1
   refetch()
 }
 
-// Watch for URL changes to refetch data
+// Modal state and form
+const inviteForm = ref({ email: '' })
+const inviteLoading = ref(false)
+const inviteErrorMsg = ref('')
+const inviteSuccessMsg = ref('')
+
+function closeInviteModal() {
+  showInviteModal.value = false
+  inviteForm.value = { email: '' }
+  inviteErrorMsg.value = ''
+  inviteSuccessMsg.value = ''
+}
+
+async function inviteTeacher() {
+  inviteErrorMsg.value = ''
+  inviteSuccessMsg.value = ''
+  if (
+    !inviteForm.value.email.trim() ||
+    !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(inviteForm.value.email)
+  ) {
+    inviteErrorMsg.value = !inviteForm.value.email.trim()
+      ? 'Email is required'
+      : 'Invalid email address'
+    return
+  }
+
+  inviteLoading.value = true
+  try {
+    const school_id = auth.get()?.payload.user.school_id
+    const { data } = await useApi('/api/v1/teacher/invite', {
+      method: 'POST',
+      body: JSON.stringify({
+        school_id,
+        emails: [inviteForm.value.email.trim()],
+      }),
+    }).json()
+
+    if (data.value.code !== 200) {
+      inviteErrorMsg.value = data.value.message || 'Failed to send invite'
+    } else {
+      inviteSuccessMsg.value = 'Invitation sent!'
+      setTimeout(() => {
+        closeInviteModal()
+        refetch()
+      }, 1000)
+    }
+  } catch (e) {
+    inviteErrorMsg.value = 'Network error'
+  } finally {
+    inviteLoading.value = false
+  }
+}
+
 watch(apiUrl, () => {
   refetch()
 })

@@ -219,19 +219,12 @@
 
 <script lang="ts" setup>
 import { useApi } from '@/stores/useApi.ts'
-import { useLocalStorage } from '@vueuse/core'
-import { jwtDecode } from 'jwt-decode'
-import type { JwtPayload } from '@/types/jwt.ts'
 import Dashboard from '@/layout/dashboard.vue'
 import type { ListTeacherResponse } from '@/types/response'
+import { useAuth } from '@/stores/useAuth'
 
-const accessToken = useLocalStorage('access_token', '')
-
-const tokenDecoded = jwtDecode<JwtPayload>(accessToken.value)
-console.log(tokenDecoded)
-
-const { response, data, isFetching, json } = useApi<ListTeacherResponse>(
-  '/api/v1/teacher?school_id=' + tokenDecoded.user.school_id,
+const { data } = useApi<ListTeacherResponse>(
+  '/api/v1/teacher?school_id=' + useAuth().get()?.payload.user,
 )
 </script>
 
