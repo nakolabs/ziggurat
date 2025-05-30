@@ -10,7 +10,7 @@ const token = route.query.token
 const email = route.query.email
 
 const loading = ref(true)
-const error = ref(null)
+const error = ref<string | null>(null)
 
 onMounted(async () => {
   try {
@@ -26,7 +26,7 @@ onMounted(async () => {
       await router.push('/login')
     }
   } catch (err) {
-    error.value = err.message || 'Unknown error'
+    error.value = err instanceof Error ? err.message : 'Unknown error'
   } finally {
     loading.value = false
   }

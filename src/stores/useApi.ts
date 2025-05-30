@@ -1,6 +1,7 @@
 import { createFetch } from '@vueuse/core'
-import type { RefreshTokenResponse, Response } from '@/types/response.ts'
+import type { Response } from '@/types/response.ts'
 import { useAuth } from '@/stores/useAuth.ts'
+import type { RefreshTokenResponse } from '@/types/login'
 
 const BASE_URL = import.meta.env.VITE_API_URL
 let isRefreshing = false

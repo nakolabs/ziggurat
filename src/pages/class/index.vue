@@ -1,14 +1,14 @@
-<!-- filepath: /home/nako/dev/genesis/enki/src/pages/class/index.vue -->
 <template>
   <Dashboard>
     <div class="p-6">
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Class Management</h1>
         <button
-          class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition"
           @click="showCreateModal = true"
+          class="bg-orange-500 hover:bg-orange-600 px-4 py-2 text-white rounded-lg flex items-center gap-2 transition-colors font-medium"
         >
-          Add Class
+          <CirclePlus />
+          Create Class
         </button>
       </div>
 
@@ -17,108 +17,51 @@
         <SearchInput v-model="searchQuery" placeholder="Search classes..." class="flex-1" />
       </div>
 
-      <!-- Classes Table -->
-      <div class="bg-white dark:bg-neutral-900 rounded-lg shadow overflow-hidden">
-        <div v-if="loading" class="p-8 text-center">
-          <div class="text-gray-500">Loading classes...</div>
-        </div>
-        <div v-else-if="error" class="p-8 text-center text-red-500">Error loading classes</div>
-        <div v-else>
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-neutral-800">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                  Name
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                  Students
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                  Created At
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-              <tr v-for="classItem in classes" :key="classItem.id">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="font-medium">{{ classItem.name }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ classItem.student_count || 0 }} students
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ new Date(classItem.created_at).toLocaleDateString() }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                  <button
-                    class="text-orange-600 hover:text-orange-900 mr-3"
-                    @click="editClass(classItem)"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    class="text-red-600 hover:text-red-900"
-                    @click="deleteClass(classItem.id)"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <!-- Classes DataTable -->
+      <DataTable
+        :data="classes"
+        :columns="classColumns"
+        :dropdown-actions="classDropdownActions"
+        :use-dropdown-actions="true"
+        :loading="loading"
+        :show-actions="true"
+        loading-text="Loading classes..."
+        empty-text="No classes found"
+      >
+        <template #cell-created_at="{ value }">
+          <span class="text-sm text-gray-500">
+            {{ new Date(value).toLocaleDateString() }}
+          </span>
+        </template>
+      </DataTable>
 
       <!-- Create Class Modal -->
-      <div
+      <BaseModal
         v-if="showCreateModal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      >
-        <div class="bg-white dark:bg-neutral-900 rounded-lg p-6 w-full max-w-md">
-          <h2 class="text-xl font-bold mb-4">Create New Class</h2>
-          <form @submit.prevent="createClass">
-            <div class="mb-4">
-              <label class="block text-sm font-medium mb-2">Class Name</label>
-              <input
-                v-model="newClass.name"
-                type="text"
-                required
-                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Enter class name"
-              />
-            </div>
-            <div class="flex justify-end gap-3">
-              <button
-                type="button"
-                @click="showCreateModal = false"
-                class="px-4 py-2 text-gray-600 border rounded-lg hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                :disabled="creating"
-                class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
-              >
-                {{ creating ? 'Creating...' : 'Create Class' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+        title="Create New Class"
+        description="Enter the details for the new class"
+        :fields="modalFields"
+        :loading="creating"
+        submit-text="Create Class"
+        cancel-text="Cancel"
+        @close="closeModal"
+        @submit="createClass"
+        @update:field="updateField"
+      />
     </div>
   </Dashboard>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
-import { useApi } from '@/stores/useApi.ts'
+import { Eye, Edit, Trash2, Users, CirclePlus } from 'lucide-vue-next'
 import Dashboard from '@/layout/dashboard.vue'
 import SearchInput from '@/components/SearchInput.vue'
+import DataTable from '@/components/DataTable.vue'
+import BaseModal from '@/components/BaseModal.vue'
+import { useApi } from '@/stores/useApi.ts'
 import { useAuth } from '@/stores/useAuth'
+import type { TableColumn, DropdownAction } from '@/types/table'
 
 const searchQuery = ref('')
 const showCreateModal = ref(false)
@@ -138,6 +81,75 @@ const {
 } = useApi('/api/v1/class?school_id=' + auth.get()?.payload.user.school_id).json()
 const classes = computed(() => data.value?.data || [])
 
+const classColumns: TableColumn[] = [
+  { key: 'name', title: 'Name' },
+  { key: 'students', title: 'Students' },
+  { key: 'created_at', title: 'Created At' },
+]
+
+const classDropdownActions: DropdownAction[] = [
+  {
+    key: 'view',
+    label: 'View Details',
+    icon: Eye,
+    handler: (classItem: any) => viewClass(classItem),
+    class: 'text-blue-600 dark:text-blue-400',
+  },
+  {
+    key: 'students',
+    label: 'Manage Students',
+    icon: Users,
+    handler: (classItem: any) => manageStudents(classItem),
+    class: 'text-purple-600 dark:text-purple-400',
+  },
+  {
+    key: 'edit',
+    label: 'Edit',
+    icon: Edit,
+    handler: (classItem: any) => editClass(classItem),
+    class: 'text-green-600 dark:text-green-400',
+  },
+  {
+    key: 'delete',
+    label: 'Delete',
+    icon: Trash2,
+    handler: (classItem: any) => deleteClass(classItem.id),
+    class: 'text-red-600 dark:text-red-400',
+  },
+]
+
+function viewClass(classItem: any) {
+  // TODO: Implement view functionality
+  console.log('View class:', classItem)
+}
+
+function manageStudents(classItem: any) {
+  // TODO: Implement manage students functionality
+  console.log('Manage students for class:', classItem)
+}
+
+const modalFields = computed(() => [
+  {
+    key: 'name',
+    label: 'Class Name',
+    value: newClass.value.name,
+    type: 'text',
+    placeholder: 'Enter class name',
+    required: true,
+  },
+])
+
+function closeModal() {
+  showCreateModal.value = false
+  newClass.value.name = ''
+}
+
+function updateField({ key, value }: { key: string; value: string }) {
+  if (key === 'name') {
+    newClass.value.name = value
+  }
+}
+
 async function createClass() {
   creating.value = true
   try {
@@ -150,8 +162,7 @@ async function createClass() {
       console.error('Error creating class:', data.value.message)
       return
     }
-    showCreateModal.value = false
-    newClass.value.name = ''
+    closeModal()
     refetch() // Refresh the classes list
   } catch (error) {
     console.error('Error creating class:', error)
@@ -167,8 +178,12 @@ function editClass(classItem: any) {
 
 async function deleteClass(classId: string) {
   if (confirm('Are you sure you want to delete this class?')) {
-    // TODO: Implement delete functionality
-    console.log('Delete class:', classId)
+    try {
+      // TODO: Implement delete functionality
+      console.log('Delete class:', classId)
+    } catch (error) {
+      console.error('Failed to delete class:', error)
+    }
   }
 }
 </script>

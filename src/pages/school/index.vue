@@ -5,92 +5,84 @@
       <div class="mb-6 flex justify-between items-center">
         <h1 class="text-2xl font-bold text-gray-900">Schools</h1>
         <button
-          @click="showModal = true"
-          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          @click="openCreateModal"
+          class="bg-orange-500 hover:bg-orange-600 px-4 py-2 text-white rounded-lg flex items-center gap-2 transition-colors font-medium"
         >
+          <CirclePlus />
           Create School
         </button>
       </div>
 
       <!-- Modal -->
-      <div
+      <BaseModal
         v-if="showModal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      >
-        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-semibold">Create New School</h2>
-            <button @click="closeModal" class="text-gray-400 hover:text-gray-600">✕</button>
-          </div>
+        :title="isEditing ? 'Edit School' : 'Create New School'"
+        :description="isEditing ? 'Update school information' : 'Add a new school to the system'"
+        :fields="modalFields"
+        :loading="isCreating"
+        :submit-text="isEditing ? 'Update School' : 'Create School'"
+        @close="closeModal"
+        @submit="handleSubmit"
+        @update:field="updateField"
+      />
 
-          <form @submit.prevent="createSchool">
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-              <input
-                v-model="formData.name"
-                type="text"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mb-6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Level</label>
-              <input
-                v-model="formData.level"
-                type="text"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="flex gap-3 justify-end">
-              <button
-                type="button"
-                @click="closeModal"
-                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                :disabled="isCreating"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-              >
-                {{ isCreating ? 'Creating...' : 'Create' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <div class="overflow-x-auto">
-        <div v-if="isFetching">Loading....</div>
-        <table v-else class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
-          <thead class="bg-gray-100 text-left text-sm font-semibold text-gray-700">
-            <tr>
-              <th class="px-4 py-2 border-b">Name</th>
-              <th class="px-4 py-2 border-b">Level</th>
-            </tr>
-          </thead>
-          <tbody class="text-sm">
-            <tr v-for="user in data?.data" :key="user.id">
-              <td class="px-4 py-2 border-b">{{ user.name }}</td>
-              <td class="px-4 py-2 border-b">{{ user.level }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        :data="data?.data"
+        :columns="columns"
+        :loading="isFetching"
+        :dropdown-actions="dropdownActions"
+        :use-dropdown-actions="true"
+        :show-actions="true"
+        loading-text="Loading schools..."
+        empty-text="No schools found"
+      />
     </main>
   </Dashboard>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useApi } from '@/stores/useApi.ts'
 import Dashboard from '@/layout/dashboard.vue'
+import DataTable from '@/components/DataTable.vue'
+import BaseModal from '@/components/BaseModal.vue'
+import { CirclePlus, Edit, Trash2 } from 'lucide-vue-next'
+import type { TableColumn } from '@/components/DataTable.vue'
+import type { DropdownAction } from '@/types/table'
 
 const { data, isFetching, execute: refresh } = useApi('/api/v1/school').json()
 
+const columns: TableColumn[] = [
+  {
+    key: 'name',
+    title: 'Name',
+  },
+  {
+    key: 'level',
+    title: 'Level',
+  },
+]
+
+const dropdownActions: DropdownAction[] = [
+  {
+    key: 'edit',
+    label: 'Edit School',
+    icon: Edit,
+    handler: (item) => openEditModal(item),
+    class: 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300',
+  },
+  {
+    key: 'delete',
+    label: 'Delete School',
+    icon: Trash2,
+    handler: (item) => deleteSchool(item),
+    class: 'text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300',
+  },
+]
+
 const showModal = ref(false)
+const isEditing = ref(false)
+const editingId = ref<string | null>(null)
 const formData = ref({
   name: '',
   level: '',
@@ -98,9 +90,59 @@ const formData = ref({
 
 const isCreating = ref(false)
 
+const modalFields = computed(() => [
+  {
+    key: 'name',
+    label: 'Name',
+    value: formData.value.name,
+    type: 'text',
+    placeholder: 'Enter school name',
+    required: true,
+  },
+  {
+    key: 'level',
+    label: 'Level',
+    value: formData.value.level,
+    type: 'text',
+    placeholder: 'Enter school level',
+    required: true,
+  },
+])
+
+const updateField = ({ key, value }: { key: string; value: string }) => {
+  formData.value[key as keyof typeof formData.value] = value
+}
+
+const openCreateModal = () => {
+  isEditing.value = false
+  editingId.value = null
+  formData.value = { name: '', level: '' }
+  showModal.value = true
+}
+
+const openEditModal = (school: any) => {
+  isEditing.value = true
+  editingId.value = school.id
+  formData.value = {
+    name: school.name,
+    level: school.level,
+  }
+  showModal.value = true
+}
+
 const closeModal = () => {
   showModal.value = false
+  isEditing.value = false
+  editingId.value = null
   formData.value = { name: '', level: '' }
+}
+
+const handleSubmit = async () => {
+  if (isEditing.value) {
+    await updateSchool()
+  } else {
+    await createSchool()
+  }
 }
 
 const createSchool = async () => {
@@ -113,6 +155,34 @@ const createSchool = async () => {
     console.error('Failed to create school:', error)
   } finally {
     isCreating.value = false
+  }
+}
+
+const updateSchool = async () => {
+  if (!editingId.value) return
+
+  isCreating.value = true
+  try {
+    await useApi(`/api/v1/school/${editingId.value}`).put(formData.value).json()
+    closeModal()
+    await refresh()
+  } catch (error) {
+    console.error('Failed to update school:', error)
+  } finally {
+    isCreating.value = false
+  }
+}
+
+const deleteSchool = async (school: any) => {
+  if (!confirm(`Are you sure you want to delete "${school.name}"?`)) {
+    return
+  }
+
+  try {
+    await useApi(`/api/v1/school/${school.id}`).delete().json()
+    await refresh()
+  } catch (error) {
+    console.error('Failed to delete school:', error)
   }
 }
 </script>

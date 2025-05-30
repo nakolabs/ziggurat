@@ -25,30 +25,3 @@ export type Meta = {
     order_by: string
   }
 }
-
-export type RegisterResponse = Response<{
-  name: string
-  email: string
-  password: string
-  username: string
-}>
-
-type TokenResponse = {
-  access_token: string
-  refresh_token: string
-}
-export type LoginResponse = Response<TokenResponse>
-export type RefreshTokenResponse = Response<TokenResponse>
-
-export type Teacher = {
-  id: string
-  name: string
-  email: string
-  is_verified: boolean
-  created_at: number
-  updated_at: number
-}
-
-export type ListTeacherResponse = Response<Teacher[]>
-
-export type TeacherDetailResponse = Response<Teacher>

@@ -16,16 +16,22 @@ import {
   HelpCircle,
   FileText,
 } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useAuth } from '@/stores/useAuth.ts'
+import { useSidebar } from '@/stores/useSidebar.ts'
 import Logo from '@/assets/logo.png'
 
 const auth = useAuth()
-const sidebarOpen = ref(true)
+const { sidebarOpen, initializeSidebar, toggleSidebar } = useSidebar()
+
+// Initialize sidebar state from localStorage
+onMounted(() => {
+  initializeSidebar()
+})
 
 const items = [
   {
-    name: 'Dashboard',
+    name: 'Home',
     path: '/home',
     icon: Home,
   },
@@ -66,10 +72,6 @@ const items = [
   },
 ]
 
-const toggleSidebar = () => {
-  sidebarOpen.value = !sidebarOpen.value
-}
-
 const logout = () => {
   auth.logout()
 }
@@ -81,18 +83,25 @@ const logout = () => {
       <!-- Sidebar -->
       <aside
         :class="[
-          'border-r  border-neutral-200 dark:border-neutral-800 transition-all duration-300 ease-in-out',
-          sidebarOpen ? 'w-64' : 'w-16',
+          'border-r border-neutral-200 dark:border-neutral-800 transition-all duration-300 ease-in-out overflow-hidden',
+          sidebarOpen ? 'w-64' : 'w-20',
         ]"
       >
         <div class="flex flex-col h-full">
           <!-- Logo -->
-          <div class="flex items-center justify-center w-full px-6 py-6">
+          <div
+            :class="[
+              'flex items-center w-full py-6',
+              sidebarOpen ? 'justify-start px-6' : 'justify-center px-2',
+            ]"
+          >
             <div class="flex items-center space-x-3">
-              <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+              <div
+                class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0"
+              >
                 <img :src="Logo" alt="Hero" class="w-8" />
               </div>
-              <span v-show="sidebarOpen" class="font-bold text-xl"> Genesis </span>
+              <span v-if="sidebarOpen" class="font-bold text-xl whitespace-nowrap"> Genesis </span>
             </div>
           </div>
 
@@ -100,13 +109,20 @@ const logout = () => {
           <nav class="flex-1 px-4 py-4 space-y-1">
             <router-link
               v-for="item in items"
-              :key="item.path"
+              :key="`${item.path}-${sidebarOpen}`"
               :to="item.path"
-              class="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group"
-              active-class="bg-orange-500/10 text-orange-400 border-r-2 border-orange-500"
+              :class="[
+                'flex items-center rounded-lg transition-colors duration-200 group',
+                sidebarOpen ? 'px-3 py-2.5' : 'justify-center py-2.5',
+              ]"
+              class="hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              active-class="bg-orange-500/10 text-orange-400"
             >
-              <component :is="item.icon" class="w-5 h-5 mr-3" />
-              <span v-show="sidebarOpen" class="font-medium">{{ item.name }}</span>
+              <component
+                :is="item.icon"
+                :class="['flex-shrink-0', sidebarOpen ? 'w-5 h-5 mr-3' : 'w-5 h-5']"
+              />
+              <span v-if="sidebarOpen" class="font-medium whitespace-nowrap">{{ item.name }}</span>
             </router-link>
           </nav>
 
@@ -116,7 +132,7 @@ const logout = () => {
               <div class="w-8 h-8 rounded-full flex items-center justify-center">
                 <User class="w-4 h-4" />
               </div>
-              <div v-show="sidebarOpen" class="flex-1 min-w-0">
+              <div v-if="sidebarOpen" class="flex-1 min-w-0">
                 <p class="text-sm font-medium truncate">
                   {{ auth.get()?.payload.user.email }}
                 </p>
@@ -138,16 +154,6 @@ const logout = () => {
               <button @click="toggleSidebar" class="p-2 rounded-lg transition-colors">
                 <Menu class="w-5 h-5" />
               </button>
-
-              <!-- Search Bar -->
-              <div class="relative hidden md:block">
-                <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  class="pl-10 pr-4 py-2 border border-neutral-200 dark:border-neutral-800 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder-neutral-400 w-64"
-                />
-              </div>
             </div>
 
             <div class="flex items-center space-x-4">

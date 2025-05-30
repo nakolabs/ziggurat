@@ -5,7 +5,9 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
-button, input {
+button,
+input,
+textarea,
+select {
   @apply outline-none;
 }
-

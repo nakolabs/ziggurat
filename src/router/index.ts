@@ -1,4 +1,3 @@
-import path from 'path'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const LandingPage = () => import('@/pages/landing-page/index.vue')

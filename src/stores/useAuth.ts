@@ -40,5 +40,11 @@ export const useAuth = defineStore('auth', {
         this.auth = JSON.parse(auth)
       }
     },
+    schoolId() {
+      return this.auth?.payload.user.school_id || ''
+    },
+    user() {
+      return this.auth?.payload.user
+    },
   },
 })
