@@ -9,8 +9,15 @@ export type Question = {
   question_type: QuestionType
   subject_name: string
   subject_id: string
+  school_id: string
   difficulty_level: DifficultyLevel
   points: number
+  options?: Array<{
+    id: string
+    text: string
+  }>
+  correct_answer?: string
+  essay_answer?: string
   created_at: number
   updated_at: number
 }
@@ -25,6 +32,13 @@ export type CreateQuestionResponse = Response<Question>
 export type UpdateQuestionResponse = Response<Question>
 
 export type ListQuestionQuery = {
-  question_type?: string
-  difficulty_level?: string
+  school_id?: string
+  subject_id?: string
+  question_type?: QuestionType
+  difficulty_level?: DifficultyLevel
+  page?: number
+  page_size?: number
+  order_by?: string
+  order?: 'asc' | 'desc'
+  search?: string
 }

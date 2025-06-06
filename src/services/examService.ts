@@ -39,12 +39,22 @@ export const examService = {
 
   // Delete exam
   deleteExam(examId: string) {
-    return useApi(`/api/v1/exam/${examId}`)
+    return useApi(`/api/v1/exam/${examId}`, {
+      method: 'DELETE',
+    })
   },
 
   // Get exam students
   getExamStudents(examId: string, page = 1, pageSize = 20) {
     return useApi(`/api/v1/exam/${examId}/students?page=${page}&page_size=${pageSize}`)
+  },
+
+  // Assign exam to class
+  assignExamToClass(data: { exam_id: string; class_id: string }) {
+    return useApi('/api/v1/exam/assign', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
   },
 
   // Grade exam
@@ -56,6 +66,29 @@ export const examService = {
         student_id: studentId,
         grade,
       }),
+    })
+  },
+
+  // Student exam endpoints
+  getStudentExams() {
+    return useApi('/api/v1/student/exam')
+  },
+
+  getStudentExamDetail(examId: string) {
+    return useApi(`/api/v1/student/exam/${examId}`)
+  },
+
+  submitExamAnswers(data: {
+    exam_id: string
+    answers: Array<{
+      question_id: string
+      answer: string
+      question_type: 'multiple_choice' | 'essay'
+    }>
+  }) {
+    return useApi('/api/v1/student/exam/submit', {
+      method: 'POST',
+      body: JSON.stringify(data),
     })
   },
 }

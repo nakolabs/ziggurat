@@ -9,32 +9,50 @@ import type {
 
 export const questionService = {
   getQuestions(query?: ListQuestionQuery) {
-    const response = useApi<ListQuestionResponse>(
-      '/api/v1/question?school_id=' + useAuth().schoolId(),
-    )
-    return response
+    const params = new URLSearchParams()
+    params.append('school_id', useAuth().schoolId())
+
+    if (query) {
+      Object.entries(query).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params.append(key, value.toString())
+        }
+      })
+    }
+
+    return useApi<ListQuestionResponse>(`/api/v1/question?${params.toString()}`)
   },
 
   createQuestion(question: Omit<Question, 'id' | 'created_at' | 'updated_at' | 'subject_name'>) {
-    const response = useApi('/api/v1/question', {
+    return useApi('/api/v1/question', {
       method: 'POST',
       body: JSON.stringify(question),
     })
-    return response
   },
 
   updateQuestion(id: string, question: Partial<Question>) {
-    const response = useApi<UpdateQuestionResponse>(`/api/v1/question/${id}`, {
+    return useApi<UpdateQuestionResponse>(`/api/v1/question/${id}`, {
       method: 'PUT',
       body: JSON.stringify(question),
     })
-    return response
   },
 
   deleteQuestion(id: string) {
-    const response = useApi(`/api/v1/question/${id}`, {
+    return useApi(`/api/v1/question/${id}`, {
       method: 'DELETE',
     })
-    return response
+  },
+
+  getQuestionDetail(id: string) {
+    return useApi(`/api/v1/question/${id}`)
+  },
+
+  getQuestionsByType(type: 'multiple_choice' | 'essay', schoolId?: string) {
+    const params = new URLSearchParams()
+    params.append('question_type', type)
+    if (schoolId) params.append('school_id', schoolId)
+    else params.append('school_id', useAuth().schoolId())
+
+    return useApi(`/api/v1/question/by-type?${params.toString()}`)
   },
 }

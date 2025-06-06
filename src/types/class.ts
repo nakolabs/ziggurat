@@ -4,6 +4,7 @@ export type Class = {
   id: string
   name: string
   school_id: string
+  students?: number
   created_at: number
   updated_at: number
 }

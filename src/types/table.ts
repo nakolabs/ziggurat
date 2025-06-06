@@ -1,8 +1,10 @@
 import type { Component } from 'vue'
 
-export type TableColumn = {
+export interface TableColumn {
   key: string
   title: string
+  sortable?: boolean
+  width?: string
   render?: Component
   formatter?: (value: any) => string
   headerClass?: string
@@ -17,10 +19,11 @@ export type TableAction = {
   class?: string
 }
 
-export type DropdownAction = {
+export interface DropdownAction {
   key: string
   label: string
   icon: Component
   handler: (item: any) => void
   class?: string
+  condition?: (item: any) => boolean
 }

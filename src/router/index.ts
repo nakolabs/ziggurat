@@ -15,6 +15,7 @@ const Subject = () => import('@/pages/subject/index.vue')
 const Class = () => import('@/pages/class/index.vue')
 const Question = () => import('@/pages/question/index.vue')
 const Exam = () => import('@/pages/exam/index.vue')
+const PPDB = () => import('@/pages/ppdb/index.vue')
 
 const routes = [
   { path: '/', name: 'LandingPage', component: LandingPage },
@@ -31,12 +32,24 @@ const routes = [
     meta: { requiresAuth: true },
   },
   { path: '/school', name: 'School', component: School, meta: { requiresAuth: true } },
+  {
+    path: '/school/profile',
+    name: 'SchoolProfile',
+    component: () => import('@/pages/school/profile.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/school/:id',
+    name: 'SchoolDetail',
+    component: () => import('@/pages/school/detail.vue'),
+    meta: { requiresAuth: true },
+  },
   { path: '/student', name: 'Student', component: Student, meta: { requiresAuth: true } },
   { path: '/subject', name: 'Subject', component: Subject, meta: { requiresAuth: true } },
   { path: '/class', name: 'Class', component: Class, meta: { requiresAuth: true } },
-  { path: '/class', name: 'Class', component: Class, meta: { requiresAuth: true } },
   { path: '/question', name: 'Question', component: Question, meta: { requiresAuth: true } },
   { path: '/exam', name: 'Exam', component: Exam, meta: { requiresAuth: true } },
+  { path: '/ppdb', name: 'PPDB', component: PPDB, meta: { requiresAuth: true } },
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',

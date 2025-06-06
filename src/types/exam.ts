@@ -6,6 +6,13 @@ export type Exam = {
   school_id: string
   subject_id: string
   subject_name: string
+  class_id: string
+  class_name: string
+  multiple_choice_ids: string[]
+  essay_question_ids: string[]
+  exam_date?: number
+  duration?: number
+  status: 'draft' | 'published' | 'active' | 'completed'
   created_at: number
   updated_at: number
 }
@@ -44,6 +51,8 @@ export type CreateExamRequest = {
   class_id: string
   multiple_choice_ids: string[]
   essay_question_ids: string[]
+  exam_date?: string
+  duration?: number
 }
 
 export type ExamListQuery = {
@@ -53,6 +62,8 @@ export type ExamListQuery = {
   page_size?: number
   order_by?: string
   order?: 'asc' | 'desc'
+  search?: string
+  status?: string
 }
 
 export type ListExamResponse = Response<Exam[]>

@@ -46,10 +46,14 @@ import { useApi } from '@/stores/useApi.ts'
 import Dashboard from '@/layout/dashboard.vue'
 import DataTable from '@/components/DataTable.vue'
 import BaseModal from '@/components/BaseModal.vue'
-import { CirclePlus, Edit, Trash2 } from 'lucide-vue-next'
+import { CirclePlus, Edit, Trash2, ArrowRightLeft, Eye } from 'lucide-vue-next'
 import type { TableColumn } from '@/components/DataTable.vue'
 import type { DropdownAction } from '@/types/table'
+import { useAuth } from '@/stores/useAuth'
+import { useRouter } from 'vue-router'
 
+const auth = useAuth()
+const router = useRouter()
 const { data, isFetching, execute: refresh } = useApi('/api/v1/school').json()
 
 const columns: TableColumn[] = [
@@ -64,6 +68,20 @@ const columns: TableColumn[] = [
 ]
 
 const dropdownActions: DropdownAction[] = [
+  {
+    key: 'view',
+    label: 'View Details',
+    icon: Eye,
+    handler: (item) => router.push(`/school/${item.id}`),
+    class: 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300',
+  },
+  {
+    key: 'switch',
+    label: 'Switch to School',
+    icon: ArrowRightLeft,
+    handler: (item) => switchSchool(item),
+    class: 'text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300',
+  },
   {
     key: 'edit',
     label: 'Edit School',
@@ -183,6 +201,35 @@ const deleteSchool = async (school: any) => {
     await refresh()
   } catch (error) {
     console.error('Failed to delete school:', error)
+  }
+}
+
+const switchSchool = async (school: any) => {
+  if (!confirm(`Switch to "${school.name}"?`)) {
+    return
+  }
+
+  try {
+    const { data: switchData } = await useApi(`/api/v1/school/${school.id}/switch`).json()
+
+    if (switchData.value?.code === 200) {
+      // Update the auth token with the new school context
+      const newAccessToken = switchData.value.data.access_token
+      const newRefreshToken = switchData.value.data.access_token
+      auth.set(newAccessToken, newRefreshToken)
+
+      // Show success message
+      alert(`Successfully switched to ${school.name}`)
+
+      // Optionally reload the page to reflect the new school context
+      window.location.reload()
+    } else {
+      console.error('Failed to switch school:', switchData.value?.message)
+      alert('Failed to switch school. Please try again.')
+    }
+  } catch (error) {
+    console.error('Failed to switch school:', error)
+    alert('Failed to switch school. Please try again.')
   }
 }
 </script>

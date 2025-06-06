@@ -15,6 +15,8 @@ import {
   School,
   HelpCircle,
   FileText,
+  UserPlus,
+  Settings,
 } from 'lucide-vue-next'
 import { ref, onMounted, nextTick } from 'vue'
 import { useAuth } from '@/stores/useAuth.ts'
@@ -39,6 +41,11 @@ const items = [
     name: 'Schools',
     path: '/school',
     icon: Building,
+  },
+  {
+    name: 'School Profile',
+    path: '/school/profile',
+    icon: Settings,
   },
   {
     name: 'Teachers',
@@ -69,6 +76,11 @@ const items = [
     name: 'Exams',
     path: '/exam',
     icon: FileText,
+  },
+  {
+    name: 'PPDB',
+    path: '/ppdb',
+    icon: UserPlus,
   },
 ]
 
