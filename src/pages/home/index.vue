@@ -3,17 +3,19 @@
     <div class="p-6 space-y-6">
       <!-- Welcome Section -->
       <div class="mb-8">
-        <h1 class="text-2xl font-bold text-white">Welcome back!</h1>
+        <h1 class="text-2xl font-bold">Welcome back!</h1>
         <p class="text-neutral-400">Here's what's happening at your school today.</p>
       </div>
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-neutral-800 p-6 rounded-lg border border-neutral-700">
+        <div
+          class="p-6 rounded-lg border border-neutral-100 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+        >
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-neutral-400">Total Teachers</p>
-              <p class="text-2xl font-bold text-white">
+              <p class="text-2xl font-bold">
                 {{ data?.data?.length || 0 }}
               </p>
             </div>
@@ -39,11 +41,13 @@
           </div>
         </div>
 
-        <div class="bg-neutral-800 p-6 rounded-lg border border-neutral-700">
+        <div
+          class="p-6 rounded-lg border border-neutral-100 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+        >
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-neutral-400">Active Students</p>
-              <p class="text-2xl font-bold text-white">1,247</p>
+              <p class="text-2xl font-bold">1,247</p>
             </div>
             <div class="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
               <svg
@@ -67,11 +71,13 @@
           </div>
         </div>
 
-        <div class="bg-neutral-800 p-6 rounded-lg border border-neutral-700">
+        <div
+          class="p-6 rounded-lg border border-neutral-100 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+        >
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-neutral-400">Classes</p>
-              <p class="text-2xl font-bold text-white">24</p>
+              <p class="text-2xl font-bold">24</p>
             </div>
             <div class="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center">
               <svg
@@ -95,11 +101,13 @@
           </div>
         </div>
 
-        <div class="bg-neutral-800 p-6 rounded-lg border border-neutral-700">
+        <div
+          class="p-6 rounded-lg border border-neutral-100 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+        >
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-neutral-400">Attendance Rate</p>
-              <p class="text-2xl font-bold text-white">94.5%</p>
+              <p class="text-2xl font-bold">94.5%</p>
             </div>
             <div class="w-12 h-12 bg-yellow-500/10 rounded-lg flex items-center justify-center">
               <svg
@@ -127,8 +135,10 @@
       <!-- Charts Row -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Recent Activity -->
-        <div class="bg-neutral-800 p-6 rounded-lg border border-neutral-700">
-          <h3 class="text-lg font-semibold text-white mb-4">Recent Activity</h3>
+        <div
+          class="p-6 rounded-lg border border-neutral-100 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+        >
+          <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
           <div class="space-y-4">
             <div class="flex items-center space-x-3">
               <div class="w-8 h-8 bg-orange-500/10 rounded-full flex items-center justify-center">
@@ -142,7 +152,7 @@
                 </svg>
               </div>
               <div class="flex-1">
-                <p class="text-sm font-medium text-white">New teacher registered</p>
+                <p class="text-sm font-medium">New teacher registered</p>
                 <p class="text-xs text-neutral-400">2 hours ago</p>
               </div>
             </div>
@@ -157,7 +167,7 @@
                 </svg>
               </div>
               <div class="flex-1">
-                <p class="text-sm font-medium text-white">Student assignment completed</p>
+                <p class="text-sm font-medium">Student assignment completed</p>
                 <p class="text-xs text-neutral-400">4 hours ago</p>
               </div>
             </div>
@@ -172,7 +182,7 @@
                 </svg>
               </div>
               <div class="flex-1">
-                <p class="text-sm font-medium text-white">System maintenance scheduled</p>
+                <p class="text-sm font-medium">System maintenance scheduled</p>
                 <p class="text-xs text-neutral-400">1 day ago</p>
               </div>
             </div>
@@ -180,13 +190,15 @@
         </div>
 
         <!-- Performance Overview -->
-        <div class="bg-neutral-800 p-6 rounded-lg border border-neutral-700">
-          <h3 class="text-lg font-semibold text-white mb-4">Performance Overview</h3>
+        <div
+          class="p-6 rounded-lg border border-neutral-100 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+        >
+          <h3 class="text-lg font-semibold mb-4">Performance Overview</h3>
           <div class="space-y-4">
             <div>
               <div class="flex justify-between text-sm mb-2">
                 <span class="text-neutral-400">Teaching Hours</span>
-                <span class="font-medium text-white">87%</span>
+                <span class="font-medium">87%</span>
               </div>
               <div class="w-full bg-neutral-700 rounded-full h-2">
                 <div class="bg-orange-500 h-2 rounded-full" style="width: 87%"></div>
@@ -195,7 +207,7 @@
             <div>
               <div class="flex justify-between text-sm mb-2">
                 <span class="text-neutral-400">Student Satisfaction</span>
-                <span class="font-medium text-white">94%</span>
+                <span class="font-medium">94%</span>
               </div>
               <div class="w-full bg-neutral-700 rounded-full h-2">
                 <div class="bg-green-500 h-2 rounded-full" style="width: 94%"></div>
@@ -204,7 +216,7 @@
             <div>
               <div class="flex justify-between text-sm mb-2">
                 <span class="text-neutral-400">Resource Utilization</span>
-                <span class="font-medium text-white">76%</span>
+                <span class="font-medium">76%</span>
               </div>
               <div class="w-full bg-neutral-700 rounded-full h-2">
                 <div class="bg-blue-500 h-2 rounded-full" style="width: 76%"></div>
