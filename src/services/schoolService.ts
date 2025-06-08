@@ -1,5 +1,6 @@
 import { useApi } from '@/stores/useApi'
 import { useAuth } from '@/stores/useAuth'
+import type { DetailSchoolResponse } from '@/types/school'
 
 export interface UpdateSchoolProfileRequest {
   name: string
@@ -18,7 +19,7 @@ export interface UpdateSchoolProfileRequest {
 export const schoolService = {
   // Get school profile
   getSchoolProfile(schoolId: string) {
-    return useApi(`/api/v1/school/${schoolId}`)
+    return useApi<DetailSchoolResponse>(`/api/v1/school/${schoolId}`)
   },
 
   // Update school profile
@@ -26,6 +27,40 @@ export const schoolService = {
     return useApi(`/api/v1/school/${schoolId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
+    })
+  },
+
+  // Update school logo
+  updateLogo(schoolId: string, file: File | null) {
+    if (!file) {
+      return useApi(`/api/v1/school/${schoolId}/logo`, {
+        method: 'DELETE',
+      })
+    }
+    
+    const formData = new FormData()
+    formData.append('logo', file)
+    
+    return useApi(`/api/v1/school/${schoolId}/logo`, {
+      method: 'PUT',
+      body: formData,
+    })
+  },
+
+  // Update school banner
+  updateBanner(schoolId: string, file: File | null) {
+    if (!file) {
+      return useApi(`/api/v1/school/${schoolId}/banner`, {
+        method: 'DELETE',
+      })
+    }
+    
+    const formData = new FormData()
+    formData.append('banner', file)
+    
+    return useApi(`/api/v1/school/${schoolId}/banner`, {
+      method: 'PUT',
+      body: formData,
     })
   },
 

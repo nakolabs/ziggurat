@@ -4,7 +4,7 @@ import { Plus, Search, Edit, Trash2, Eye, Users, Play, CirclePlus } from 'lucide
 import Dashboard from '@/layout/dashboard.vue'
 import CreateExamModal from '@/components/CreateExamModal.vue'
 import DataTable from '@/components/DataTable.vue'
-import SearchInput from '@/components/SearchInput.vue'
+import SearchInput from '@/components/forms/SearchInput.vue'
 import type { Exam, ListExamResponse } from '@/types/exam'
 import { examService } from '@/services/examService'
 import { useAuth } from '@/stores/useAuth'

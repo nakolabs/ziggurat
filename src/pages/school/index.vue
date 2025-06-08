@@ -1,242 +1,452 @@
 <template>
   <Dashboard>
-    <main class="p-6 overflow-auto">
-      <!-- Create School Button -->
-      <div class="mb-6 flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-gray-900">Schools</h1>
-        <button
-          @click="openCreateModal"
-          class="bg-orange-500 hover:bg-orange-600 px-4 py-2 text-white rounded-lg flex items-center gap-2 transition-colors font-medium"
+    <div class="min-h-screen bg-gray-50/50 dark:bg-neutral-950">
+      <div class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Page Title with Action Button -->
+        <div class="flex items-center justify-between mb-8">
+          <div></div>
+          <button
+            @click="router.push('/school/create')"
+            class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm"
+          >
+            <CirclePlus class="w-4 h-4" />
+            Add School
+          </button>
+        </div>
+
+        <!-- Clean Statistics Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div
+            class="bg-white dark:bg-neutral-900 rounded-xl p-5 border border-gray-100 dark:border-neutral-800"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Total</p>
+                <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {{ totalSchools }}
+                </p>
+              </div>
+              <Building class="w-5 h-5 text-gray-400" />
+            </div>
+          </div>
+
+          <div
+            class="bg-white dark:bg-neutral-900 rounded-xl p-5 border border-gray-100 dark:border-neutral-800"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Students</p>
+                <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {{ totalStudents.toLocaleString() }}
+                </p>
+              </div>
+              <Users class="w-5 h-5 text-gray-400" />
+            </div>
+          </div>
+
+          <div
+            class="bg-white dark:bg-neutral-900 rounded-xl p-5 border border-gray-100 dark:border-neutral-800"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Teachers</p>
+                <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {{ totalTeachers.toLocaleString() }}
+                </p>
+              </div>
+              <GraduationCap class="w-5 h-5 text-gray-400" />
+            </div>
+          </div>
+
+          <div
+            class="bg-white dark:bg-neutral-900 rounded-xl p-5 border border-gray-100 dark:border-neutral-800"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Active</p>
+                <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {{ activeSchools }}
+                </p>
+              </div>
+              <TrendingUp class="w-5 h-5 text-gray-400" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Minimalist Search and Filters -->
+        <div
+          class="bg-white dark:bg-neutral-900 rounded-xl border border-gray-100 dark:border-neutral-800 p-6 mb-6"
         >
-          <CirclePlus />
-          Create School
-        </button>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+              <div class="relative">
+                <Search
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"
+                />
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  placeholder="Search schools..."
+                  class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent bg-gray-50 dark:bg-neutral-800 text-gray-900 dark:text-white transition-all"
+                  @input="onSearchInput"
+                />
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <select
+                v-model="levelFilter"
+                @change="handleFilterChange"
+                class="px-3 py-2.5 text-sm border border-gray-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent bg-gray-50 dark:bg-neutral-800 text-gray-900 dark:text-white transition-all"
+              >
+                <option value="">All Levels</option>
+                <option value="elementary">Elementary</option>
+                <option value="junior">Junior High</option>
+                <option value="senior">Senior High</option>
+                <option value="college">University</option>
+              </select>
+              <select
+                v-model="statusFilter"
+                @change="handleFilterChange"
+                class="px-3 py-2.5 text-sm border border-gray-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent bg-gray-50 dark:bg-neutral-800 text-gray-900 dark:text-white transition-all"
+              >
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="pending">Pending</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clean Data Table -->
+        <div
+          class="bg-white dark:bg-neutral-900 rounded-xl border border-gray-100 dark:border-neutral-800 overflow-hidden"
+        >
+          <DataTable
+            :data="filteredData"
+            :columns="columns"
+            :loading="isFetching"
+            :show-actions="false"
+            :clickable-rows="true"
+            :show-pagination="true"
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :total-items="totalItems"
+            :page-size="pageSize"
+            :sort-by="sortBy"
+            :sort-order="sortOrder"
+            loading-text="Loading schools..."
+            empty-text="No schools found"
+            @row-click="handleRowClick"
+            @page-change="handlePageChange"
+            @page-size-change="handlePageSizeChange"
+            @sort="handleSort"
+          >
+            <!-- Clean School Cell -->
+            <template #cell-school="{ item }">
+              <div class="flex items-center gap-3 py-2">
+                <div
+                  class="w-8 h-8 rounded-lg overflow-hidden bg-gray-100 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0"
+                >
+                  <img
+                    v-if="item.logo"
+                    :src="item.logo"
+                    :alt="item.name"
+                    class="w-full h-full object-cover"
+                  />
+                  <span v-else class="text-gray-600 dark:text-gray-400 font-medium text-xs">
+                    {{ item.name?.charAt(0) || 'S' }}
+                  </span>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="font-medium text-gray-900 dark:text-white text-sm">
+                    {{ item.name }}
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ item.city || 'Location not specified' }}
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- Simplified Level Badge -->
+            <template #cell-level="{ value }">
+              <span :class="getLevelColor(value)" class="px-2 py-1 text-xs font-medium rounded-md">
+                {{ formatLevel(value) }}
+              </span>
+            </template>
+
+            <!-- Clean Stats Display -->
+            <template #cell-stats="{ item }">
+              <div class="text-xs">
+                <div class="text-gray-900 dark:text-white font-medium mb-0.5">
+                  {{ (item.student_count || 0).toLocaleString() }} students
+                </div>
+                <div class="text-gray-500 dark:text-gray-400">
+                  {{ item.teacher_count || 0 }} teachers
+                </div>
+              </div>
+            </template>
+
+            <!-- Minimal Status Indicator -->
+            <template #cell-status="{ value }">
+              <div class="flex items-center gap-2">
+                <div :class="getStatusDotColor(value)" class="w-1.5 h-1.5 rounded-full"></div>
+                <span class="text-xs text-gray-600 dark:text-gray-400">{{
+                  formatStatus(value)
+                }}</span>
+              </div>
+            </template>
+
+            <!-- Clean Date Format -->
+            <template #cell-created_at="{ value }">
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                {{ formatDate(value) }}
+              </div>
+            </template>
+          </DataTable>
+        </div>
       </div>
-
-      <!-- Modal -->
-      <BaseModal
-        v-if="showModal"
-        :title="isEditing ? 'Edit School' : 'Create New School'"
-        :description="isEditing ? 'Update school information' : 'Add a new school to the system'"
-        :fields="modalFields"
-        :loading="isCreating"
-        :submit-text="isEditing ? 'Update School' : 'Create School'"
-        @close="closeModal"
-        @submit="handleSubmit"
-        @update:field="updateField"
-      />
-
-      <DataTable
-        :data="data?.data"
-        :columns="columns"
-        :loading="isFetching"
-        :dropdown-actions="dropdownActions"
-        :use-dropdown-actions="true"
-        :show-actions="true"
-        loading-text="Loading schools..."
-        empty-text="No schools found"
-      />
-    </main>
+    </div>
   </Dashboard>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useApi } from '@/stores/useApi.ts'
 import Dashboard from '@/layout/dashboard.vue'
 import DataTable from '@/components/DataTable.vue'
-import BaseModal from '@/components/BaseModal.vue'
-import { CirclePlus, Edit, Trash2, ArrowRightLeft, Eye } from 'lucide-vue-next'
-import type { TableColumn } from '@/components/DataTable.vue'
-import type { DropdownAction } from '@/types/table'
-import { useAuth } from '@/stores/useAuth'
+import {
+  CirclePlus,
+  Search,
+  Building,
+  Users,
+  GraduationCap,
+  TrendingUp,
+  Eye,
+  Edit,
+  Trash2,
+  MapPin,
+} from 'lucide-vue-next'
+import type { TableColumn, DropdownAction } from '@/types/table'
 import { useRouter } from 'vue-router'
+import type { ListSchoolResponse, School } from '@/types/school'
+import { MoreVertical } from 'lucide-vue-next'
 
-const auth = useAuth()
 const router = useRouter()
-const { data, isFetching, execute: refresh } = useApi('/api/v1/school').json()
 
+// Search and filter states
+const searchQuery = ref('')
+const levelFilter = ref('')
+const statusFilter = ref('')
+
+// Pagination states
+const currentPage = ref(1)
+const pageSize = ref(10)
+const sortBy = ref('created_at')
+const sortOrder = ref<'asc' | 'desc'>('desc')
+
+// Computed API URL with pagination parameters
+const apiUrl = computed(() => {
+  const params = new URLSearchParams({
+    page_num: currentPage.value.toString(),
+    page_size: pageSize.value.toString(),
+    order_by: sortBy.value,
+    order: sortOrder.value,
+    search_by: 'name',
+  })
+
+  if (searchQuery.value) {
+    params.append('search', searchQuery.value)
+  }
+
+  if (levelFilter.value) {
+    params.append('level', levelFilter.value)
+  }
+
+  if (statusFilter.value) {
+    params.append('status', statusFilter.value)
+  }
+
+  return `/api/v1/school?${params.toString()}`
+})
+
+const { data, isFetching, execute: refetch } = useApi<ListSchoolResponse>(apiUrl).json()
+
+// Table columns with simplified design
 const columns: TableColumn[] = [
   {
-    key: 'name',
-    title: 'Name',
+    key: 'school',
+    title: 'School',
+    width: '300px',
   },
   {
     key: 'level',
     title: 'Level',
+    width: '150px',
+  },
+  {
+    key: 'stats',
+    title: 'Stats',
+    width: '180px',
+  },
+  {
+    key: 'status',
+    title: 'Status',
+    width: '120px',
+  },
+  {
+    key: 'created_at',
+    title: 'Created',
+    width: '120px',
   },
 ]
 
-const dropdownActions: DropdownAction[] = [
-  {
-    key: 'view',
-    label: 'View Details',
-    icon: Eye,
-    handler: (item) => router.push(`/school/${item.id}`),
-    class: 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300',
-  },
-  {
-    key: 'switch',
-    label: 'Switch to School',
-    icon: ArrowRightLeft,
-    handler: (item) => switchSchool(item),
-    class: 'text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300',
-  },
-  {
-    key: 'edit',
-    label: 'Edit School',
-    icon: Edit,
-    handler: (item) => openEditModal(item),
-    class: 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300',
-  },
-  {
-    key: 'delete',
-    label: 'Delete School',
-    icon: Trash2,
-    handler: (item) => deleteSchool(item),
-    class: 'text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300',
-  },
-]
-
-const showModal = ref(false)
-const isEditing = ref(false)
-const editingId = ref<string | null>(null)
-const formData = ref({
-  name: '',
-  level: '',
+// Computed properties for filtering and statistics
+const filteredData = computed(() => {
+  return data.value?.data || []
 })
 
-const isCreating = ref(false)
+const totalPages = computed(() => {
+  return data.value?.meta?.pagination?.total_page || 1
+})
 
-const modalFields = computed(() => [
-  {
-    key: 'name',
-    label: 'Name',
-    value: formData.value.name,
-    type: 'text',
-    placeholder: 'Enter school name',
-    required: true,
-  },
-  {
-    key: 'level',
-    label: 'Level',
-    value: formData.value.level,
-    type: 'text',
-    placeholder: 'Enter school level',
-    required: true,
-  },
-])
+const totalItems = computed(() => {
+  return data.value?.meta?.pagination?.total_data || 0
+})
 
-const updateField = ({ key, value }: { key: string; value: string }) => {
-  formData.value[key as keyof typeof formData.value] = value
-}
+const totalSchools = computed(() => totalItems.value)
+const totalStudents = computed(
+  () => data.value?.data?.reduce((sum, school) => sum + (school.student_count || 0), 0) || 0,
+)
+const totalTeachers = computed(
+  () => data.value?.data?.reduce((sum, school) => sum + (school.teacher_count || 0), 0) || 0,
+)
+const activeSchools = computed(
+  () => data.value?.data?.filter((school) => (school.status || 'active') === 'active').length || 0,
+)
 
-const openCreateModal = () => {
-  isEditing.value = false
-  editingId.value = null
-  formData.value = { name: '', level: '' }
-  showModal.value = true
-}
-
-const openEditModal = (school: any) => {
-  isEditing.value = true
-  editingId.value = school.id
-  formData.value = {
-    name: school.name,
-    level: school.level,
+// Search with debounce
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
+const onSearchInput = () => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
   }
-  showModal.value = true
+  searchTimeout = setTimeout(() => {
+    currentPage.value = 1
+    refetch()
+  }, 300)
 }
 
-const closeModal = () => {
-  showModal.value = false
-  isEditing.value = false
-  editingId.value = null
-  formData.value = { name: '', level: '' }
+const handleFilterChange = () => {
+  currentPage.value = 1
+  refetch()
 }
 
-const handleSubmit = async () => {
-  if (isEditing.value) {
-    await updateSchool()
-  } else {
-    await createSchool()
-  }
+const handleSort = (key: string, order: 'asc' | 'desc') => {
+  sortBy.value = key
+  sortOrder.value = order
+  currentPage.value = 1
+  refetch()
 }
 
-const createSchool = async () => {
-  isCreating.value = true
-  try {
-    await useApi('/api/v1/school').post(formData.value).json()
-    closeModal()
-    await refresh()
-  } catch (error) {
-    console.error('Failed to create school:', error)
-  } finally {
-    isCreating.value = false
-  }
+// Pagination handlers
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+  refetch()
 }
 
-const updateSchool = async () => {
-  if (!editingId.value) return
-
-  isCreating.value = true
-  try {
-    await useApi(`/api/v1/school/${editingId.value}`).put(formData.value).json()
-    closeModal()
-    await refresh()
-  } catch (error) {
-    console.error('Failed to update school:', error)
-  } finally {
-    isCreating.value = false
-  }
+const handlePageSizeChange = (size: number) => {
+  pageSize.value = size
+  currentPage.value = 1 // Reset to first page when changing page size
+  refetch()
 }
 
-const deleteSchool = async (school: any) => {
-  if (!confirm(`Are you sure you want to delete "${school.name}"?`)) {
-    return
+// Row click handler
+const handleRowClick = (school: any) => {
+  router.push(`/school/${school.id}`)
+}
+
+// Utility functions
+const formatLevel = (level: string) => {
+  if (!level) return 'Unknown'
+
+  const levelMap: Record<string, string> = {
+    elementary: 'Elementary',
+    junior: 'Junior High',
+    senior: 'Senior High',
+    college: 'University',
   }
 
-  try {
-    await useApi(`/api/v1/school/${school.id}`).delete().json()
-    await refresh()
-  } catch (error) {
-    console.error('Failed to delete school:', error)
-  }
+  return levelMap[level] || level.charAt(0).toUpperCase() + level.slice(1)
 }
 
-const switchSchool = async (school: any) => {
-  if (!confirm(`Switch to "${school.name}"?`)) {
-    return
+const getLevelColor = (level: string) => {
+  const colorMap: Record<string, string> = {
+    elementary: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
+    junior: 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400',
+    senior: 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
+    college: 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400',
   }
 
-  try {
-    const { data: switchData } = await useApi(`/api/v1/school/${school.id}/switch`).json()
-
-    if (switchData.value?.code === 200) {
-      // Update the auth token with the new school context
-      const newAccessToken = switchData.value.data.access_token
-      const newRefreshToken = switchData.value.data.access_token
-      auth.set(newAccessToken, newRefreshToken)
-
-      // Show success message
-      alert(`Successfully switched to ${school.name}`)
-
-      // Optionally reload the page to reflect the new school context
-      window.location.reload()
-    } else {
-      console.error('Failed to switch school:', switchData.value?.message)
-      alert('Failed to switch school. Please try again.')
-    }
-  } catch (error) {
-    console.error('Failed to switch school:', error)
-    alert('Failed to switch school. Please try again.')
-  }
+  return colorMap[level] || 'bg-gray-50 text-gray-600 dark:bg-gray-900/20 dark:text-gray-400'
 }
+
+const formatStatus = (status: string) => {
+  return (status || 'active').charAt(0).toUpperCase() + (status || 'active').slice(1)
+}
+
+const getStatusDotColor = (status: string) => {
+  const colorMap: Record<string, string> = {
+    active: 'bg-green-500',
+    inactive: 'bg-red-500',
+    pending: 'bg-yellow-500',
+  }
+
+  return colorMap[status || 'active'] || 'bg-gray-500'
+}
+
+const formatDate = (timestamp: string | number) => {
+  if (!timestamp) return 'Unknown'
+
+  const date = new Date(timestamp)
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
+// Menu state
+const openMenuId = ref<string | null>(null)
+
+const toggleMenu = (schoolId: string) => {
+  openMenuId.value = openMenuId.value === schoolId ? null : schoolId
+}
+
+// Close menu when clicking outside
+const closeMenu = () => {
+  openMenuId.value = null
+}
+
+onMounted(() => {
+  document.addEventListener('click', closeMenu)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeMenu)
+})
 </script>
 
-<style>
-body {
-  margin: 0;
-  font-family: 'Inter', sans-serif;
+<style scoped>
+/* Minimal custom styles */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

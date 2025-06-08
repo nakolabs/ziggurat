@@ -48,3 +48,5 @@ export type UpdateStudentClassRequest = {
   old_class_id?: string
   new_class_id: string
 }
+
+export type DetailStudentResponse = Response<Student>

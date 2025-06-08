@@ -8,7 +8,8 @@ export type JwtPayload = {
     user: {
         id: string
         email: string,
-        role_id: string,
+        school_role: string,
         school_id: string,
+        user_role: string
     }
 }

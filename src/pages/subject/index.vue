@@ -54,7 +54,7 @@
 import { ref, computed } from 'vue'
 import { Edit, Trash2, Eye, CirclePlus } from 'lucide-vue-next'
 import Dashboard from '@/layout/dashboard.vue'
-import SearchInput from '@/components/SearchInput.vue'
+import SearchInput from '@/components/forms/SearchInput.vue'
 import DataTable from '@/components/DataTable.vue'
 import BaseModal from '@/components/BaseModal.vue'
 import { useApi } from '@/stores/useApi.ts'
