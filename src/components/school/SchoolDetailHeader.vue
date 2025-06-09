@@ -27,9 +27,7 @@
           class="absolute -bottom-2 -right-2 w-8 h-8 bg-orange-500 hover:bg-orange-600 text-white rounded-full flex items-center justify-center transition-all duration-200 shadow-md opacity-0 group-hover/logo:opacity-100"
           title="Edit Logo"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
+         <Camera class="w-4 h-4" />
         </button>
       </div>
       
@@ -56,6 +54,7 @@
 
 <script setup lang="ts">
 import { formatDate } from '@vueuse/core'
+import { Camera } from 'lucide-vue-next';
 
 interface Props {
   schoolData?: any

@@ -41,16 +41,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Users, GraduationCap, BookOpen, FileText } from 'lucide-vue-next'
-
-interface SchoolStats {
-  teachers: number
-  students: number
-  classes: number
-  subjects: number
-}
+import type { SchoolStatistics } from '@/types/school'
 
 interface Props {
-  stats: SchoolStats
+  stats: SchoolStatistics
   school?: any
 }
 
@@ -98,11 +92,11 @@ const quickActions = [
 const performanceMetrics = computed(() => [
   {
     label: 'Teacher Ratio',
-    value: `1:${Math.round(props.stats.students / props.stats.teachers)}`
+    value: `1:${props.stats.teacher_ratio ?? 'N/A'}`
   },
   {
     label: 'Avg. Class Size',
-    value: Math.round(props.stats.students / props.stats.classes)
+    value: props.stats.avg_class_size ?? 'N/A'
   },
   {
     label: 'Academic Year',

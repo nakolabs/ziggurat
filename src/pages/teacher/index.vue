@@ -16,48 +16,56 @@
 
         <!-- Clean Statistics Grid -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div class="bg-white dark:bg-neutral-900 rounded-xl p-5 border border-gray-100 dark:border-neutral-800">
+          <div
+            class="bg-white dark:bg-neutral-900 rounded-xl p-5 border border-gray-100 dark:border-neutral-800"
+          >
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Total</p>
                 <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                  {{ data?.meta?.pagination?.total_data || 0 }}
+                  {{ statData?.data.total_teachers || 0 }}
                 </p>
               </div>
               <Users class="w-5 h-5 text-gray-400" />
             </div>
           </div>
 
-          <div class="bg-white dark:bg-neutral-900 rounded-xl p-5 border border-gray-100 dark:border-neutral-800">
+          <div
+            class="bg-white dark:bg-neutral-900 rounded-xl p-5 border border-gray-100 dark:border-neutral-800"
+          >
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Verified</p>
                 <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                  {{ verifiedTeachers }}
+                  {{ statData?.data.verified_teachers || 0 }}
                 </p>
               </div>
               <UserCheck class="w-5 h-5 text-gray-400" />
             </div>
           </div>
 
-          <div class="bg-white dark:bg-neutral-900 rounded-xl p-5 border border-gray-100 dark:border-neutral-800">
+          <div
+            class="bg-white dark:bg-neutral-900 rounded-xl p-5 border border-gray-100 dark:border-neutral-800"
+          >
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Pending</p>
                 <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                  {{ pendingTeachers }}
+                  {{ statData?.data.pending_teachers || 0 }}
                 </p>
               </div>
               <Clock class="w-5 h-5 text-gray-400" />
             </div>
           </div>
 
-          <div class="bg-white dark:bg-neutral-900 rounded-xl p-5 border border-gray-100 dark:border-neutral-800">
+          <div
+            class="bg-white dark:bg-neutral-900 rounded-xl p-5 border border-gray-100 dark:border-neutral-800"
+          >
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Active</p>
                 <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                  {{ activeTeachers }}
+                  {{ statData?.data.active_teachers || 0 }}
                 </p>
               </div>
               <TrendingUp class="w-5 h-5 text-gray-400" />
@@ -66,12 +74,16 @@
         </div>
 
         <!-- Enhanced Search and Filters -->
-        <div class="bg-white dark:bg-neutral-900 rounded-xl border border-gray-100 dark:border-neutral-800 p-6 mb-6">
+        <div
+          class="bg-white dark:bg-neutral-900 rounded-xl border border-gray-100 dark:border-neutral-800 p-6 mb-6"
+        >
           <div class="space-y-4">
             <!-- Search Row -->
             <div class="flex gap-3">
               <div class="flex-1 relative">
-                <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"
+                />
                 <input
                   id="teacher-search"
                   v-model="searchQuery"
@@ -116,9 +128,9 @@
                   class="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent bg-gray-50 dark:bg-neutral-800 text-gray-900 dark:text-white transition-all"
                 >
                   <option value="">All Subjects</option>
-                  <option 
-                    v-for="subject in availableSubjects" 
-                    :key="subject.id" 
+                  <option
+                    v-for="subject in availableSubjects"
+                    :key="subject.id"
                     :value="subject.id"
                   >
                     {{ subject.name }}
@@ -135,9 +147,9 @@
                   class="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent bg-gray-50 dark:bg-neutral-800 text-gray-900 dark:text-white transition-all"
                 >
                   <option value="">All Classes</option>
-                  <option 
-                    v-for="classItem in availableClasses" 
-                    :key="classItem.id" 
+                  <option
+                    v-for="classItem in availableClasses"
+                    :key="classItem.id"
                     :value="classItem.id"
                   >
                     {{ classItem.name }}
@@ -160,7 +172,9 @@
         </div>
 
         <!-- Clean Data Table -->
-        <div class="bg-white dark:bg-neutral-900 rounded-xl border border-gray-100 dark:border-neutral-800 overflow-hidden">
+        <div
+          class="bg-white dark:bg-neutral-900 rounded-xl border border-gray-100 dark:border-neutral-800 overflow-hidden"
+        >
           <DataTable
             :data="data?.data || []"
             :columns="teacherColumns"
@@ -181,7 +195,9 @@
             <!-- Clean Teacher Cell -->
             <template #cell-teacher="{ item }">
               <div class="flex items-center gap-3 py-2">
-                <div class="w-8 h-8 rounded-lg overflow-hidden bg-gray-100 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0">
+                <div
+                  class="w-8 h-8 rounded-lg overflow-hidden bg-gray-100 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0"
+                >
                   <span class="text-gray-600 dark:text-gray-400 font-medium text-xs">
                     {{ item.name?.charAt(0) || 'T' }}
                   </span>
@@ -199,8 +215,12 @@
 
             <!-- Simplified Status Badge -->
             <template #cell-is_verified="{ value }">
-              <span 
-                :class="value ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'" 
+              <span
+                :class="
+                  value
+                    ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
+                    : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+                "
                 class="px-2 py-1 text-xs font-medium rounded-md"
               >
                 {{ value ? 'Verified' : 'Pending' }}
@@ -217,21 +237,21 @@
             <!-- Subject Cell -->
             <template #cell-subjects="{ item }">
               <div class="flex flex-wrap gap-1">
-                <span 
+                <span
                   v-if="!item.subjects || item.subjects.length === 0"
                   class="text-xs text-gray-400 dark:text-gray-500"
                 >
                   No subjects assigned
                 </span>
-                <span 
+                <span
                   v-else
-                  v-for="subject in item.subjects.slice(0, 2)" 
+                  v-for="subject in item.subjects.slice(0, 2)"
                   :key="subject.id"
                   class="px-2 py-1 text-xs font-medium bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 rounded-md"
                 >
                   {{ subject.name }}
                 </span>
-                <span 
+                <span
                   v-if="item.subjects && item.subjects.length > 2"
                   class="px-2 py-1 text-xs font-medium bg-gray-50 text-gray-600 dark:bg-gray-900/20 dark:text-gray-400 rounded-md"
                 >
@@ -243,21 +263,21 @@
             <!-- Class Cell -->
             <template #cell-classes="{ item }">
               <div class="flex flex-wrap gap-1">
-                <span 
+                <span
                   v-if="!item.classes || item.classes.length === 0"
                   class="text-xs text-gray-400 dark:text-gray-500"
                 >
                   No classes assigned
                 </span>
-                <span 
+                <span
                   v-else
-                  v-for="classItem in item.classes.slice(0, 2)" 
+                  v-for="classItem in item.classes.slice(0, 2)"
                   :key="classItem.id"
                   class="px-2 py-1 text-xs font-medium bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400 rounded-md"
                 >
                   {{ classItem.name }}
                 </span>
-                <span 
+                <span
                   v-if="item.classes && item.classes.length > 2"
                   class="px-2 py-1 text-xs font-medium bg-gray-50 text-gray-600 dark:bg-gray-900/20 dark:text-gray-400 rounded-md"
                 >
@@ -299,9 +319,22 @@ import InviteTeacherModal from '@/components/InviteTeacherModal.vue'
 import SearchInput from '@/components/forms/SearchInput.vue'
 import DataTable from '@/components/DataTable.vue'
 import { useAuth } from '@/stores/useAuth.ts'
-import type { ListTeacherResponse, Teacher } from '@/types/teacher'
+import type { ListTeacherResponse, Teacher, TeacherStatisticsResponse } from '@/types/teacher'
 import type { TableColumn, DropdownAction } from '@/types/table'
-import { UserPlus, Eye, Edit, Trash2, Circle, CirclePlus, Search, Users, UserCheck, Clock, TrendingUp, X } from 'lucide-vue-next'
+import {
+  UserPlus,
+  Eye,
+  Edit,
+  Trash2,
+  Circle,
+  CirclePlus,
+  Search,
+  Users,
+  UserCheck,
+  Clock,
+  TrendingUp,
+  X,
+} from 'lucide-vue-next'
 
 const auth = useAuth()
 const router = useRouter()
@@ -371,6 +404,11 @@ const apiUrl = computed(() => {
 
 // API call
 const { data, isFetching, error, execute: refetch } = useApi(apiUrl).json<ListTeacherResponse>()
+const {
+  data: statData,
+  isFetching: statIsFetching,
+  execute: statRefetch,
+} = useApi('/api/v1/teacher/statistic').json<TeacherStatisticsResponse>()
 
 // Enhanced search handler
 const handleSearch = () => {
@@ -385,11 +423,11 @@ const handleFilterChange = () => {
 }
 
 // Modal state and form
-const inviteForm = ref({ 
-  email: '', 
+const inviteForm = ref({
+  email: '',
   name: '',
   subjectIds: [] as string[],
-  classIds: [] as string[]
+  classIds: [] as string[],
 })
 const inviteLoading = ref(false)
 const inviteErrorMsg = ref('')
@@ -397,11 +435,11 @@ const inviteSuccessMsg = ref('')
 
 function closeInviteModal() {
   showInviteModal.value = false
-  inviteForm.value = { 
-    email: '', 
+  inviteForm.value = {
+    email: '',
     name: '',
     subjectIds: [],
-    classIds: []
+    classIds: [],
   }
   inviteErrorMsg.value = ''
   inviteSuccessMsg.value = ''
@@ -427,12 +465,14 @@ async function inviteTeacher() {
       method: 'POST',
       body: JSON.stringify({
         school_id,
-        teachers: [{
-          email: inviteForm.value.email,
-          name: inviteForm.value.name,
-          subject_ids: inviteForm.value.subjectIds,
-          class_ids: inviteForm.value.classIds,
-        }],
+        teachers: [
+          {
+            email: inviteForm.value.email,
+            name: inviteForm.value.name,
+            subject_ids: inviteForm.value.subjectIds,
+            class_ids: inviteForm.value.classIds,
+          },
+        ],
       }),
     }).json()
 
@@ -451,19 +491,6 @@ async function inviteTeacher() {
     inviteLoading.value = false
   }
 }
-
-// Computed properties for statistics
-const verifiedTeachers = computed(() => 
-  data.value?.data?.filter(teacher => teacher.is_verified).length || 0
-)
-
-const pendingTeachers = computed(() => 
-  data.value?.data?.filter(teacher => !teacher.is_verified).length || 0
-)
-
-const activeTeachers = computed(() => 
-  data.value?.data?.length || 0
-)
 
 const totalPages = computed(() => {
   return data.value?.meta?.pagination?.total_page || 1
@@ -492,15 +519,15 @@ const handleRowClick = (teacher: Teacher) => {
 
 const formatDate = (timestamp: number | string) => {
   if (!timestamp) return '-'
-  
+
   const date = typeof timestamp === 'string' ? new Date(timestamp) : new Date(timestamp)
-  
+
   if (isNaN(date.getTime())) return '-'
-  
+
   return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
-    year: 'numeric'
+    year: 'numeric',
   })
 }
 

@@ -63,7 +63,7 @@
           >
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Active</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Class</p>
                 <p class="text-2xl font-semibold text-gray-900 dark:text-white">
                   {{ activeSchools }}
                 </p>
@@ -204,6 +204,33 @@
                 {{ formatDate(value) }}
               </div>
             </template>
+
+            <!-- Action Column -->
+            <template #cell-actions="{ item }">
+              <!-- <div class="flex items-center"> -->
+                <button
+                  @click.stop="switchSchool(item)"
+                  :disabled="isSwitching(item.id) || auth.schoolId() === item.id"
+                  :class="[
+                    'p-2 rounded-lg transition-all duration-200',
+                    auth.schoolId() === item.id
+                      ? 'text-green-600 hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/20'
+                      : 'text-gray-400 hover:bg-gray-200 dark:text-gray-500 dark:hover:bg-gray-800',
+                    isSwitching(item.id) || auth.schoolId() === item.id
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'cursor-pointer',
+                  ]"
+                  :title="item.status === 'active' ? 'Switch School' : ''"
+                >
+                  <div
+                    v-if="isSwitching(item.id)"
+                    class="w-8 h-8 animate-spin rounded-full border-2 border-current border-t-transparent"
+                  ></div>
+                  <ToggleRight v-else-if="auth.schoolId() === item.id" class="w-6 h-6" />
+                  <ToggleLeft v-else class="w-6 h-6" />
+                </button>
+              <!-- </div> -->
+            </template>
           </DataTable>
         </div>
       </div>
@@ -227,13 +254,18 @@ import {
   Edit,
   Trash2,
   MapPin,
+  ToggleLeft,
+  ToggleRight,
 } from 'lucide-vue-next'
 import type { TableColumn, DropdownAction } from '@/types/table'
 import { useRouter } from 'vue-router'
-import type { ListSchoolResponse, School } from '@/types/school'
+import type { ListSchoolResponse, ListSchoolStatisticsResponse, School } from '@/types/school'
 import { MoreVertical } from 'lucide-vue-next'
+import { useAuth } from '@/stores/useAuth'
+import type { LoginResponse } from '@/types/login'
 
 const router = useRouter()
+const auth = useAuth()
 
 // Search and filter states
 const searchQuery = ref('')
@@ -271,7 +303,12 @@ const apiUrl = computed(() => {
   return `/api/v1/school?${params.toString()}`
 })
 
-const { data, isFetching, execute: refetch } = useApi<ListSchoolResponse>(apiUrl).json()
+const { data, isFetching, execute: refetch } = useApi(apiUrl).json<ListSchoolResponse>()
+const {
+  data: statData,
+  isFetching: statFetching,
+  execute: statRefetch,
+} = useApi('/api/v1/school/statistic').json<ListSchoolStatisticsResponse>()
 
 // Table columns with simplified design
 const columns: TableColumn[] = [
@@ -300,6 +337,11 @@ const columns: TableColumn[] = [
     title: 'Created',
     width: '120px',
   },
+  {
+    key: 'actions',
+    title: 'Switch School',
+    // width: '100px',
+  },
 ]
 
 // Computed properties for filtering and statistics
@@ -315,16 +357,10 @@ const totalItems = computed(() => {
   return data.value?.meta?.pagination?.total_data || 0
 })
 
-const totalSchools = computed(() => totalItems.value)
-const totalStudents = computed(
-  () => data.value?.data?.reduce((sum, school) => sum + (school.student_count || 0), 0) || 0,
-)
-const totalTeachers = computed(
-  () => data.value?.data?.reduce((sum, school) => sum + (school.teacher_count || 0), 0) || 0,
-)
-const activeSchools = computed(
-  () => data.value?.data?.filter((school) => (school.status || 'active') === 'active').length || 0,
-)
+const totalSchools = computed(() => statData.value?.data.total_schools || 0)
+const totalStudents = computed(() => statData.value?.data.total_students || 0)
+const totalTeachers = computed(() => statData.value?.data.total_teachers || 0)
+const activeSchools = computed(() => statData.value?.data.active_schools || 0)
 
 // Search with debounce
 let searchTimeout: ReturnType<typeof setTimeout> | null = null
@@ -436,6 +472,37 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('click', closeMenu)
 })
+
+// Add switch school functionality
+const switchingSchools = ref(new Set<string>())
+
+const switchSchool = async (school: any) => {
+  const schoolId = school.id
+
+  // Prevent multiple clicks
+  if (switchingSchools.value.has(schoolId)) return
+
+  switchingSchools.value.add(schoolId)
+
+  try {
+    const { data, execute } = await useApi(
+      `/api/v1/school/${schoolId}/switch`,
+    ).json<LoginResponse>()
+    if (!data.value?.data.access_token || !data.value?.data.refresh_token) {
+      throw new Error('Failed to switch school: No tokens received')
+    }
+    auth.set(data.value?.data.access_token!, data.value?.data.refresh_token!)
+  } catch (error) {
+    console.error('Failed to switch school:', error)
+    // You can add toast notification here if you have one
+  } finally {
+    switchingSchools.value.delete(schoolId)
+  }
+}
+
+const isSwitching = (schoolId: string) => {
+  return switchingSchools.value.has(schoolId)
+}
 </script>
 
 <style scoped>

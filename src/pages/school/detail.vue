@@ -30,7 +30,6 @@
                 @edit="toggleEditMode"
                 @cancel="cancelEdit"
                 @save="handleSave"
-                @delete="deleteSchool"
                 @update:logo-file="handleLogoFile"
                 @update:banner-file="handleBannerFile"
                 @remove-logo="handleRemoveLogo"
@@ -39,6 +38,30 @@
 
               <!-- Recent Activities -->
               <RecentActivities :activities="activities" />
+              <!-- Danger Zone -->
+              <div
+                class="bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-800/30"
+              >
+                <div class="px-5 py-4">
+                  <h3
+                    class="text-sm font-semibold text-red-900 dark:text-red-400 flex items-center gap-2 mb-2"
+                  >
+                    <Trash2 class="w-4 h-4" />
+                    Delete School
+                  </h3>
+                  <p class="text-red-700 dark:text-red-300 text-xs mb-3">
+                    This action cannot be undone and will permanently delete all associated data.
+                  </p>
+
+                  <button
+                    @click="deleteSchool"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-medium transition-all duration-200"
+                  >
+                    <Trash2 class="w-3 h-3" />
+                    Delete
+                  </button>
+                </div>
+              </div>
             </div>
 
             <!-- Sidebar -->
@@ -52,7 +75,7 @@
         <!-- Modals -->
         <LogoEditModal
           v-if="showLogoModal"
-          :school="schoolData"
+          :school="schoolData!"
           :is-saving="isSaving"
           @close="showLogoModal = false"
           @save="(file) => handleLogoSave(file, false)"
@@ -86,6 +109,7 @@ import RecentActivities from '@/components/school/RecentActivities.vue'
 import BannerEditModal from '@/components/school/BannerEditModal.vue'
 import LogoEditModal from '@/components/school/LogoEditModal.vue'
 import { useSchoolDetail } from '@/composables/useSchoolDetail'
+import { Trash2 } from 'lucide-vue-next'
 
 const route = useRoute()
 const schoolId = computed(() => route.params.id as string)

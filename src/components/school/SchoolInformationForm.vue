@@ -9,7 +9,7 @@
           <button
             v-if="!isEditMode"
             @click="$emit('edit')"
-            class="px-4 py-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+            class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
           >
             <Edit class="w-4 h-4" />
             Edit
@@ -30,13 +30,6 @@
               {{ isSaving ? 'Saving...' : 'Save Changes' }}
             </button>
           </template>
-          <button
-            @click="$emit('delete')"
-            class="px-3 py-2 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-          >
-            <Trash2 class="w-4 h-4" />
-            <span class="hidden sm:inline">Delete</span>
-          </button>
         </div>
       </div>
       
@@ -187,7 +180,7 @@ const levelOptions = [
   { value: 'elementary', label: 'Elementary School' },
   { value: 'junior', label: 'Junior High School' },
   { value: 'senior', label: 'Senior High School' },
-  { value: 'university', label: 'University' }
+  { value: 'college', label: 'University' }
 ]
 
 const formatLevel = (level: string) => {
@@ -197,7 +190,7 @@ const formatLevel = (level: string) => {
     'elementary': 'Elementary School',
     'junior': 'Junior High School', 
     'senior': 'Senior High School',
-    'university': 'University'
+    'college': 'University'
   }
   
   return levelMap[level] || level.charAt(0).toUpperCase() + level.slice(1)
